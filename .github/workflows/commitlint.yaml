@@ -1,0 +1,37 @@
+name: commitlint
+on:
+  pull_request:
+    branches: [ main ]
+permissions:
+  actions: read
+  attestations: none
+  checks: read
+  contents: read
+  deployments: none
+  id-token: none
+  issues: read
+  discussions: read
+  packages: read
+  pages: none
+  pull-requests: write
+  repository-projects: none
+  security-events: none
+  statuses: none
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    env:
+      COMMITLINT_VERSION: '19.6.0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+      - name: Setup CommitLint
+        run: |
+          npm install -g conventional-changelog-conventionalcommits commitlint@${COMMITLINT_VERSION} @commitlint/config-conventional@${COMMITLINT_VERSION}
+          echo -n "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.js
+      - name: Run CommitLint
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
